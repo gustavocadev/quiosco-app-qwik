@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id         String   @id @unique @default(uuid())
+  name       String
+  price      Float
+  image      String
+  // many to one
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+}
+
+model Category {
+  id   Int    @id @unique
+  name String
+  icon String
+  slug String
+
+  // one to many
+  products Product[]
+}
+
+model Order {
+  id         String   @id @unique @default(uuid())
+  name       String
+  date       String
+  total      Float
+  // many to one
+  order      Customer @relation(fields: [customerId], references: [id])
+  customerId String
+}
+
+// Resumen - ShoppingCart
+// todo : add relation with a Customer - Customer now is a auth user
+model ShoppingCart {
+  id         String   @id @unique @default(uuid())
+  name       String
+  date       String
+  price      Int
+  // many to one
+  order      Customer @relation(fields: [customerId], references: [id])
+  customerId String
+}
+
+model Customer {
+  id    String @id @unique @default(uuid())
+  name  String
+  phone String
+  email String
+
+  // one to many
+  orders       Order[]
+  ShoppingCart ShoppingCart[]
+}
