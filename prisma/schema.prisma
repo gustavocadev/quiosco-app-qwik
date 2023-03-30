@@ -50,10 +50,14 @@ model ShoppingCart {
 }
 
 model Customer {
-  id    String @id @unique @default(uuid())
-  name  String
-  phone String
-  email String
+  id       String  @id @unique @default(uuid())
+  name     String
+  lastName String
+  address  String?
+  username String?
+  phone    String?
+  email    String
+  password String
 
   // one to many
   orders       Order[]
