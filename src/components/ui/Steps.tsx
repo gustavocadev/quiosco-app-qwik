@@ -1,5 +1,5 @@
 import { component$ } from '@builder.io/qwik';
-import { useNavigate, useLocation } from '@builder.io/qwik-city';
+import { useLocation } from '@builder.io/qwik-city';
 
 const steps = [
   {
@@ -21,7 +21,7 @@ const steps = [
 ];
 
 export const Steps = component$(() => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const location = useLocation();
 
   return (
@@ -29,15 +29,9 @@ export const Steps = component$(() => {
       <section class="flex justify-between mb-5 ">
         {steps.map(({ step, name, url }) => {
           return (
-            <button
-              key={step}
-              onClick$={() => {
-                navigate(url);
-              }}
-              class="text-2xl font-bold"
-            >
+            <a key={step} href={url} class="text-2xl font-bold">
               {name}
-            </button>
+            </a>
           );
         })}
       </section>
