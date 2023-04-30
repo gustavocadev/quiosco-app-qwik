@@ -1,7 +1,7 @@
 import { component$ } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import { Product } from '~/components/quiosco/Product';
-import { prisma } from '~/server/prisma';
+import { prisma } from '~/lib/prisma';
 
 export const useLoaderProducts = routeLoader$(async ({ params }) => {
   const categoryName = params.categoryName;
