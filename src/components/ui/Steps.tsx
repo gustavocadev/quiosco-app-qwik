@@ -1,5 +1,5 @@
 import { component$ } from '@builder.io/qwik';
-import { useLocation } from '@builder.io/qwik-city';
+import { Link, useLocation } from '@builder.io/qwik-city';
 
 const steps = [
   {
@@ -29,9 +29,9 @@ export const Steps = component$(() => {
       <section class="flex justify-between mb-5 ">
         {steps.map(({ step, name, url }) => {
           return (
-            <a key={step} href={url} class="text-2xl font-bold">
+            <Link key={step} href={url} class="text-2xl font-bold">
               {name}
-            </a>
+            </Link>
           );
         })}
       </section>
