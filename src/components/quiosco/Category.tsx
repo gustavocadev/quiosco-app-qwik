@@ -1,5 +1,5 @@
 import { component$ } from '@builder.io/qwik';
-import { useLocation } from '@builder.io/qwik-city';
+import { Link, useLocation } from '@builder.io/qwik-city';
 import type { Category as ICategory } from '@prisma/client';
 
 export interface CategoryProps {
@@ -10,7 +10,7 @@ export const Category = component$<CategoryProps>(({ category }) => {
   const location = useLocation();
 
   return (
-    <a
+    <Link
       href={`/category/${category.slug}/`}
       class={{
         'bg-amber-400': `/category/${category.slug}/` === location.url.pathname,
@@ -27,6 +27,6 @@ export const Category = component$<CategoryProps>(({ category }) => {
         />
       </figure>
       <h2 class="text-2xl font-bold ">{category.name}</h2>
-    </a>
+    </Link>
   );
 });
