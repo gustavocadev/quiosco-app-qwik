@@ -6,10 +6,13 @@ import {
   z,
   zod$,
 } from '@builder.io/qwik-city';
-import { auth } from '~/lib/lucia';
+import { handleRequest } from '~/lib/lucia';
+import { prisma } from '~/lib/prisma';
+import { generateIdFromEntropySize } from 'lucia';
+import { hashPassword } from 'qwik-lucia';
 
 export const useSignupLoader = routeLoader$(async (event) => {
-  const authRequest = auth.handleRequest(event);
+  const authRequest = handleRequest(event);
   const { user } = await authRequest.validateUser();
 
   // if user is already logged in, redirect to /category/cafe
@@ -23,21 +26,17 @@ export const useSignupLoader = routeLoader$(async (event) => {
 export const useSignupAction = routeAction$(
   async (values, event) => {
     const username = `${values.firstName}${Date.now()}`.toLowerCase();
-    await auth.createUser({
-      primaryKey: {
-        // my credentials
-        providerId: 'email',
-        providerUserId: values.email,
-        password: values.password,
-      },
-      // custom attributes
-      attributes: {
+
+    const passwordHash = await hashPassword(values.password);
+
+    await prisma.user.create({
+      data: {
         email: values.email,
-        name: `${values.firstName}`,
-        lastName: `${values.lastName}`,
+        name: values.firstName,
+        lastName: values.lastName,
         username: username,
-        phone: '',
-        address: '',
+        id: generateIdFromEntropySize(10),
+        passwordHash,
       },
     });
 

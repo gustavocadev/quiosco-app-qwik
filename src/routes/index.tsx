@@ -7,10 +7,11 @@ import {
   z,
   zod$,
 } from '@builder.io/qwik-city';
-import { auth } from '~/lib/lucia';
+import { handleRequest } from '~/lib/lucia';
+import { login } from '~/server/services/auth/auth';
 
 export const useLoginLoader = routeLoader$(async (event) => {
-  const authRequest = auth.handleRequest(event);
+  const authRequest = handleRequest(event);
   const { user } = await authRequest.validateUser();
 
   // if user is already logged in, redirect to /category/cafe
@@ -23,10 +24,10 @@ export const useLoginLoader = routeLoader$(async (event) => {
 
 export const useLoginAction = routeAction$(
   async (values, event) => {
-    const authRequest = auth.handleRequest(event);
+    const authRequest = handleRequest(event);
 
-    const key = await auth.useKey('email', values.email, values.password);
-    const session = await auth.createSession(key.userId);
+    const { message, session } = await login(values.email, values.password);
+    if (!session) return event.fail(400, { message });
 
     authRequest.setSession(session);
 
@@ -40,6 +41,7 @@ export const useLoginAction = routeAction$(
 
 export default component$(() => {
   const loginAction = useLoginAction();
+
   return (
     <div class="max-w-2xl mx-auto border mt-20 p-4">
       <section class="flex gap-8 items-center flex-wrap">

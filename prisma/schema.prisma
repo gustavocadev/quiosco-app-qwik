@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Product {
-  id         String   @id @unique @default(uuid())
+  id         String   @id @default(uuid())
   name       String
   price      Float
   image      String
@@ -28,66 +28,50 @@ model Category {
 }
 
 model Order {
-  id         String   @id @unique @default(uuid())
+  id         String @id @default(uuid())
   name       String
   date       String
   total      Float
   // many to one
-  order      AuthUser @relation(fields: [customerId], references: [id])
+  order      User   @relation(fields: [customerId], references: [id])
   customerId String
 }
 
 // Resumen - ShoppingCart
 // todo : add relation with a Customer - Customer now is a auth user
 model ShoppingCart {
-  id         String   @id @unique @default(uuid())
+  id         String @id @default(uuid())
   name       String
   date       String
   price      Int
   // many to one
-  order      AuthUser @relation(fields: [customerId], references: [id])
+  order      User   @relation(fields: [customerId], references: [id])
   customerId String
 }
 
-model AuthUser {
-  id           String        @id @unique
-  auth_session AuthSession[]
-  auth_key     AuthKey[]
+model User {
+  id       String    @id @default(uuid())
+  sessions Session[]
   // here you can add custom fields for your user
   // e.g. name, email, username, roles, etc.
-  name         String
-  lastName     String
-  address      String?
-  username     String?
-  phone        String?
-  email        String
+  name     String
+  lastName String
+  address  String?
+  username String?
+  phone    String?
+  email    String
+
+  passwordHash String
 
   // one to many
   orders       Order[]
   ShoppingCart ShoppingCart[]
-
-  @@map("auth_user")
 }
 
-model AuthSession {
-  id             String   @id @unique
-  user_id        String
-  active_expires BigInt
-  idle_expires   BigInt
-  auth_user      AuthUser @relation(references: [id], fields: [user_id], onDelete: Cascade)
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
 
-  @@index([user_id])
-  @@map("auth_session")
-}
-
-model AuthKey {
-  id              String   @id @unique
-  hashed_password String?
-  user_id         String
-  primary_key     Boolean
-  expires         BigInt?
-  auth_user       AuthUser @relation(references: [id], fields: [user_id], onDelete: Cascade)
-
-  @@index([user_id])
-  @@map("auth_key")
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
 }

@@ -1,17 +1,28 @@
-import prismaAdapter from '@lucia-auth/adapter-prisma';
-import lucia from "lucia-auth";
-import { qwik } from "lucia-auth/middleware";
-import { prisma } from './prisma';
+import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
+import { Lucia } from "lucia";
+import { prisma } from "./prisma";
+import { qwikLuciaConfig } from "qwik-lucia";
+import type { User } from "@prisma/client";
 
-export const auth = lucia({
-  adapter: prismaAdapter(prisma),
-  env: process.env.NODE_ENV === "production" ? "PROD" : "DEV",
-  middleware: qwik(),
-  transformDatabaseUser: (userData) => ({
-    userId: userData.id,
-    email: userData.email,
-  })
+const prismaAdapter = new PrismaAdapter(prisma.session, prisma.user);
+
+export const lucia = new Lucia(prismaAdapter, {
+	sessionCookie: {
+		attributes: {
+			// set to `true` when using HTTPS
+			secure: import.meta.env.PROD,
+		},
+	},
+	getUserAttributes: (userData) => ({
+		email: userData.email,
+	}),
 });
 
+export const { handleRequest } = qwikLuciaConfig(lucia);
 
-export const Auth = typeof auth;
+declare module "lucia" {
+	interface Register {
+		Lucia: typeof lucia;
+		DatabaseUserAttributes: Omit<User, "id">;
+	}
+}

@@ -1,5 +1,7 @@
+import { PrismaClient } from '@prisma/client';
 import { productos, categorias } from './data';
-import { prisma } from '../src/server/prisma';
+
+const prisma = new PrismaClient();
 
 const seed = async () => {
   try {

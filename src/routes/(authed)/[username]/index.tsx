@@ -5,20 +5,20 @@ import {
   routeLoader$,
   useLocation,
 } from '@builder.io/qwik-city';
-import { auth } from '~/lib/lucia';
+import { handleRequest } from '~/lib/lucia';
 import { prisma } from '~/lib/prisma';
 
 export const useuserLoader = routeLoader$(async (event) => {
-  const authRequest = auth.handleRequest(event);
+  const authRequest = handleRequest(event);
   const { user } = await authRequest.validateUser();
   // if user is already logged in, redirect to login page
   if (!user) {
     throw event.redirect(303, '/');
   }
 
-  const userDB = await prisma.authUser.findUnique({
+  const userDB = await prisma.user.findUnique({
     where: {
-      id: user.userId,
+      id: user.id,
     },
   });
 
@@ -30,13 +30,12 @@ export const useuserLoader = routeLoader$(async (event) => {
 });
 
 export const useSignoutAction = routeAction$(async (_, event) => {
-  const authRequest = auth.handleRequest(event);
-  const session = await authRequest.validate();
+  const authRequest = handleRequest(event);
+  const { session } = await authRequest.validateUser();
 
   if (!session) throw event.redirect(303, '/');
 
-  await auth.invalidateSession(session.sessionId);
-  authRequest.setSession(null); // setting to null removes cookie
+  await authRequest.invalidateSessionCookie(session);
 
   throw event.redirect(303, '/');
 });
@@ -72,7 +71,7 @@ export default component$(() => {
               type="text"
               class="p-2 rounded border bg-gray-50 w-full"
               name="username"
-              bind:value={loc.params.username}
+              value={loc.params.username}
             />
 
             <h3 class="font-bold text-xl">Informacion personal</h3>
@@ -84,7 +83,7 @@ export default component$(() => {
               type="text"
               class="p-2 rounded border bg-gray-50 w-full"
               name="names"
-              bind:value={userLoader.value.userDB?.name}
+              value={userLoader.value.userDB?.name}
             />
 
             <label for="lastNames">
@@ -95,7 +94,7 @@ export default component$(() => {
               type="text"
               class="p-2 rounded border bg-gray-50"
               name="lastNames"
-              bind:value={userLoader.value.userDB?.lastName}
+              value={userLoader.value.userDB?.lastName}
             />
 
             <label for="email">
@@ -106,7 +105,7 @@ export default component$(() => {
               type="email"
               class="p-2 rounded border bg-gray-50"
               name="email"
-              bind:value={userLoader.value.userDB?.email}
+              value={userLoader.value.userDB?.email}
             />
 
             <label for="address">
@@ -118,7 +117,7 @@ export default component$(() => {
               class="p-2 rounded border bg-gray-50"
               name="address"
               placeholder='Ej: "Nuevo Ilo, Mz. 2 Lt. 3"'
-              bind:value={userLoader.value.userDB?.address ?? ''}
+              value={userLoader.value.userDB?.address ?? ''}
             />
 
             <label for="phone">
@@ -130,7 +129,7 @@ export default component$(() => {
               class="p-2 rounded border bg-gray-50"
               name="phone"
               placeholder='Ej: "92106003"'
-              bind:value={userLoader.value.userDB?.phone ?? ''}
+              value={userLoader.value.userDB?.phone ?? ''}
             />
 
             <h3 class="font-bold text-xl">Cambiar contraseña</h3>

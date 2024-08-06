@@ -3,23 +3,23 @@ import { Sidebar } from '~/components/ui/Sidebar';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import { prisma } from '~/lib/prisma';
 import { Steps } from '~/components/ui/Steps';
-import { auth } from '~/lib/lucia';
+import { handleRequest } from '~/lib/lucia';
 
 export const useLoaderCategories = routeLoader$(async () => {
   return prisma.category.findMany();
 });
 
 export const useLoaderUser = routeLoader$(async (event) => {
-  const authRequest = auth.handleRequest(event);
+  const authRequest = handleRequest(event);
   const { user } = await authRequest.validateUser();
   // if user is already logged in, redirect to login page
   if (!user) {
     throw event.redirect(303, '/');
   }
 
-  const userDB = await prisma.authUser.findUnique({
+  const userDB = await prisma.user.findUnique({
     where: {
-      id: user.userId,
+      id: user.id,
     },
   });
 
